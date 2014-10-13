@@ -1,36 +1,34 @@
 // - Functions ---------------
 struct MyFn {
-    x: Box<FnMut<(String,), String> + Send>,
+    x: Box<Fn<(String,), String> + Send>,
     s: String
 }
 
-impl FnMut<(String,), String> for MyFn {
-    extern "rust-call" fn call_mut(&mut self, (_,): (String,)) -> String {
-        self.s + self.x.call_mut(("".to_string(),))
+impl Fn<(String,), String> for MyFn {
+    extern "rust-call" fn call(&self, (_,): (String,)) -> String {
+        self.s + self.x.call(("".to_string(),))
     }
 }
 
 struct Id;
 
-impl FnMut<(String,), String> for Id {
-    extern "rust-call" fn call_mut(&mut self, (s,): (String,)) -> String {
+impl Fn<(String,), String> for Id {
+    extern "rust-call" fn call(&self, (s,): (String,)) -> String {
         s
     }
 }
 
 // - Main ------------------------
-
-fn test(n: int, d: int, s: String, x: Box<FnMut<(String,), String> + Send>) 
-        -> Box<FnMut<(String,), String> + Send> {
-    if n % d == 0 {
-        box MyFn { x: x, s: s }
+fn fizzbuzz(n: int) -> String {
+    let test = |d, s: &str, x| if n % d == 0 {
+        box MyFn { x: x, s: s.to_string() } as Box<Fn<(String,), String> + Send>
     } else {
         x
-    }
-}
+    };
 
-fn fizzbuzz(n: int) -> String {
-    test(n, 3, "fizz".to_string(), test(n, 5, "buzz".to_string(), box Id)).call_mut((n.to_string(),))
+    let x = test(5, "buzz", box Id);
+    let x2 = test(3, "fizz", x);
+    x2.call((n.to_string(),))
 }
 
 fn main() {
