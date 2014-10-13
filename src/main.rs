@@ -1,16 +1,21 @@
-// - Functions ---------------
 struct Const<A> {
     x: A
 }
 
-impl<A, B> Fn<(B,), A> for Const<A> where A: Clone {
+/// Implements the constant function b -> a for `Const`
+impl<A, B> Fn<(B,), A> for Const<A> where A: Send + Clone {
     extern "rust-call" fn call(&self, (_,): (B,)) -> A {
         self.x.clone()
     }
 }
 
+fn const_<A, B>(a: A) -> Box<Fn<(B,), A> + Send> where A: Send + Clone {
+    box Const { x: a }
+}
+
 struct Id;
 
+/// Implements the id function a -> a for `Id`
 impl<A> Fn<(A,), A> for Id {
     extern "rust-call" fn call(&self, (a,): (A,)) -> A {
         a
@@ -21,9 +26,7 @@ impl<A> Fn<(A,), A> for Id {
 fn fizzbuzz(n: int) -> String {
     let test = |d, s: &str, x: Box<Fn<(String,), String> + Send>|
         if n % d == 0 {
-            box Const {
-                x: s.to_string() + x.call(("".to_string(),))
-            } as Box<Fn<(String,), String> + Send>
+            const_(s.to_string() + x.call(("".to_string(),)))
         } else {
             x
         };
