@@ -1,5 +1,5 @@
 [package]
 
-name = "FizzBuzz"
+name = "fizzbuzz"
 version = "0.0.1"
 authors = ["Tim Kuehn <tkuehn@cmu.edu>"]
