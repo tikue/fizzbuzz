@@ -1,12 +1,11 @@
 // - Functions ---------------
-struct MyFn {
-    x: Box<Fn<(String,), String> + Send>,
-    s: String
+struct Const<A> {
+    x: A
 }
 
-impl Fn<(String,), String> for MyFn {
-    extern "rust-call" fn call(&self, (_,): (String,)) -> String {
-        self.s + self.x.call(("".to_string(),))
+impl<A, B> Fn<(B,), A> for Const<A> where A: Clone {
+    extern "rust-call" fn call(&self, (_,): (B,)) -> A {
+        self.x.clone()
     }
 }
 
@@ -20,11 +19,14 @@ impl Fn<(String,), String> for Id {
 
 // - Main ------------------------
 fn fizzbuzz(n: int) -> String {
-    let test = |d, s: &str, x| if n % d == 0 {
-        box MyFn { x: x, s: s.to_string() } as Box<Fn<(String,), String> + Send>
-    } else {
-        x
-    };
+    let test = |d, s: &str, x: Box<Fn<(String,), String> + Send>|
+        if n % d == 0 {
+            box Const {
+                x: s.to_string() + x.call(("".to_string(),))
+            } as Box<Fn<(String,), String> + Send>
+        } else {
+            x
+        };
 
     let x = test(5, "buzz", box Id);
     let x2 = test(3, "fizz", x);
