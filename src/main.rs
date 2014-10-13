@@ -2,13 +2,16 @@ struct Const<A> {
     x: A
 }
 
-/// Implements the constant function b -> a for `Const`
+/// Implements the function b -> a for `Const`
 impl<A, B> Fn<(B,), A> for Const<A> where A: Send + Clone {
     extern "rust-call" fn call(&self, (_,): (B,)) -> A {
         self.x.clone()
     }
 }
 
+/// The constant function a -> b -> a
+/// Due to limitations in the type system, the type of b is fixed at the time `const_` is called
+/// rather than at the time the created function is called
 fn const_<A, B>(a: A) -> Box<Fn<(B,), A> + Send> where A: Send + Clone {
     box Const { x: a }
 }
@@ -22,7 +25,12 @@ impl<A> Fn<(A,), A> for Id {
     }
 }
 
-// - Main ------------------------
+/// Implements the FizzBuzz algorithm.
+/// If n is:
+///     * divisible by 3, returns "fizz"
+///     * divisible by 5, returns "buzz"
+///     * divisible by 3 and 5, returns "fizzbuzz"
+///     * anything else, returns n as a String
 fn fizzbuzz(n: int) -> String {
     let test = |d, s: &str, x: Box<Fn<(String,), String> + Send>|
         if n % d == 0 {
