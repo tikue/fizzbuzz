@@ -11,9 +11,9 @@ impl<A, B> Fn<(B,), A> for Const<A> where A: Clone {
 
 struct Id;
 
-impl Fn<(String,), String> for Id {
-    extern "rust-call" fn call(&self, (s,): (String,)) -> String {
-        s
+impl<A> Fn<(A,), A> for Id {
+    extern "rust-call" fn call(&self, (a,): (A,)) -> A {
+        a
     }
 }
 
