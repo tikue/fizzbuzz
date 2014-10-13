@@ -34,8 +34,8 @@ fn fizzbuzz(n: int) -> String {
 }
 
 fn main() {
-    println!("fizzbuzz(15) = {}", fizzbuzz(15));
-    println!("fizzbuzz(5) = {}", fizzbuzz(5));
-    println!("fizzbuzz(3) = {}", fizzbuzz(3));
-    println!("fizzbuzz(7) = {}", fizzbuzz(7));
+    assert!(fizzbuzz(3).as_slice() == "fizz");
+    assert!(fizzbuzz(5).as_slice() == "buzz");
+    assert!(fizzbuzz(15).as_slice() == "fizzbuzz");
+    assert!(fizzbuzz(7).as_slice() == "7");
 }
